@@ -50,6 +50,10 @@ matrix$b06tentsu1[matrix$b06tentsu1 == 3] <- 1
 matrix$b08famil2[matrix$b08famil2 == 3 | matrix$b08famil2 == 4] <- 1
 matrix$b10med2[matrix$b10med2 == 3 | matrix$b10med2 == 4] <- 1
 matrix$b13tentsu2[matrix$b13tentsu2 == 3] <- 1
+#matrix$miniA11[matrix$miniA11 == 99] <- ? 
+#matrix$miniA12[matrix$miniA12 == 99 | matrix$miniA12 == 168] <- ? 
+#matrix$miniA03ATa[matrix$miniA03ATa == 8] <- 0 
+#matrix$miniA03ATb[matrix$miniA03ATb == 8] <- 0 
 
 # counting NA values
 #sum(is.na(matrix$esquizoide)) # 60
@@ -80,6 +84,8 @@ matrix$b13tentsu2[matrix$b13tentsu2 == 3] <- 1
 # int to factor
 
 
+# miniA11 - idade primeiro ep. depressivo
+# miniA12 - quantos períodos distintos de depressao?
 # b01famil1 - mãe doença psi
 # b04interna1 - internação materna
 # b03med1 - mãe medicamento psi
