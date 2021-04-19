@@ -3,8 +3,8 @@ library(dplyr)
 library(purrr)
 
 # read dataframe
-df <- read.csv('/home/pepper/dox/uni/ppgsc/conversao/predicao-mdd/data/banco-conversao-16-10-20.csv')
-df_josi <- read.csv('/home/pepper/dox/uni/ppgsc/conversao/bancos-variados/banco-conversao-josi.csv')
+df <- read.csv('/home/pepper/dox/repos/amanda-masters/data/banco-conversao-16-10-20.csv')
+df_josi <- read.csv('/home/pepper/dox/repos/amanda-masters/data/banco-conversao-josi.csv')
 
 # check dataframe structure
 #str(df) 
