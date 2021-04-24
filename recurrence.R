@@ -17,6 +17,8 @@ df <- df %>% filter(., !is.na(mora_t2))
 colnames(df_josi)[colnames(df_josi) == "a02rec"] <- "rec"
 
 # add variables from another dataset
+## 8 values in all variables from third part except e2
+## miniA11 and A12 have lots of 99 values
 df <- left_join(df, df_josi %>%
    select(rec, starts_with("CTQ"), miniA11, miniA12, miniA03ATa, miniA03ATb, miniA03ATc1,
           miniA03ATc2, miniA03ATd, miniA03ATe1, miniA03ATe2, miniA03ATf, miniA03ATg), by = "rec")
@@ -51,10 +53,7 @@ matrix <- df %>%
                     esquizotipico, paranoide, histrionico, narcisista, borderline, anti_social,
                     evitativo, dependente, compulsivo, alcoolabudep, maconhaabudep,
                     alucinogenosabudep, abudepoutrasdrogas, abudepoutrasdrogasshipnoticos,
-                    cigarroabudep, suiciderisk_MINI, CTQ, miniA11, miniA03ATa, miniA03ATb,
-                    miniA03ATc2, miniA03ATc2, miniA03ATd, miniA03ATe1, miniA03ATe2, miniA03ATf,
-                    miniA03ATg)
-
+                    cigarroabudep, suiciderisk_MINI, CTQ)
 # correct wrong codification
 matrix$alucinogenosabudep[is.na(matrix$alucinogenosabudep)] <- 2
 matrix$b01famil1[matrix$b01famil1 == 3 | matrix$b01famil1 == 4] <- 1

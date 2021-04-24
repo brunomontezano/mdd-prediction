@@ -26,17 +26,20 @@ df <- df %>% mutate(bdi_total = rowSums(select(., starts_with("BDI"))))
 # create outcome variable
 df <- df %>% 
       mutate(dep_severa = case_when(
-                            # not severe depression
-                            bdi_total <= 24 &
+                            # mild depression
+                            bdi_total <= 11 &
                             TB_erros != 3 ~ 0,
+                            # moderate depression
+                            bdi_total >= 12 & bdi_total <= 24 &
+                            TB_erros != 3 ~ 1,
                             # severe depression
                             bdi_total > 24 &
-                            TB_erros != 3 ~ 1
+                            TB_erros != 3 ~ 2
                       ))
 
 # subset dataframe and select variables included in model
 matrix <- df %>%
-          filter(., (dep_severa == 0 | dep_severa == 1)) %>%
+          filter(., (dep_severa == 0 | dep_severa == 2)) %>%
           select(., dep_severa, a03sexo, a05idade, abepdicotomica, cordapele, escolaridade,
                     a36relaciona, b01famil1, b04interna1, b03med1, b06tentsu1, b08famil2,
                     b10med2, b13tentsu2, uso_crackandcocaina, nemtrabnemestuda,

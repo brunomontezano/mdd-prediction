@@ -1,4 +1,4 @@
-# Anotações com Pedro sobre paper da Amanda (prediçãod de MDD recorrente)
+# Anotações com Pedro sobre paper da Amanda (predição de MDD recorrente)
 
 - Modelo de regressão logística regularizada (elastic net)
 - Existe o risco das imputações se transformarem em um padrão
@@ -15,3 +15,9 @@
 - Conversão para TB - vd
 - Depressão grave - 24 na BDI, 0 - 11, 12 - 24 - vd
 - Depressão disfuncional - disfuncional acima de 11 para bipolares - vd
+- Testar por domínio o CTQ (agora)
+- Dividir por cluster os transt. personalidade
+- Depressão severa comparada com leve e tirar os moderados
+- Funcional e disfuncional - independente do diagnóstico (colocar diagnóstico no modelo) - baixa cognição talvez
+
+- MANDAR AMANHÃ DE NOITE
