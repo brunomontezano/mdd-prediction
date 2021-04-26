@@ -7,7 +7,7 @@ and BD conversion in MDD patients after three years of follow-up.
 
 It contains:
 
-- Dataset used;
+- Datasets used;
 - Scripts for each prediction model;
 - Notes about virtual meetings.
 
