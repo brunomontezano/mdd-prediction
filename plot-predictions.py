@@ -6,7 +6,7 @@ sns.set()
 sns.set_style("whitegrid")
 
 predictions = []
-with open('data/predictions.csv') as fid:
+with open('recurrence/predictions.csv') as fid:
     reader = csv.reader(fid, delimiter=',', quotechar='|')
     for i, row in enumerate(reader):
         print(row)

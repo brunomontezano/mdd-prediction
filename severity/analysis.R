@@ -3,8 +3,8 @@ library(dplyr)
 library(purrr)
 
 # read dataframe
-df <- read.csv('/home/pepper/dox/repos/amanda-masters/data/banco-conversao-16-10-20.csv')
-df_josi <- read.csv('/home/pepper/dox/repos/amanda-masters/data/banco-conversao-josi.csv')
+df <- read.csv('../data/banco-conversao-16-10-20.csv')
+df_josi <- read.csv('../data/banco-conversao-josi.csv')
 
 # check dataframe structure
 #str(df) 
@@ -20,18 +20,35 @@ df <- left_join(df, df_josi %>%
    select(rec, starts_with("CTQ"), miniA11, miniA12, miniA03ATa, miniA03ATb, miniA03ATc1,
           miniA03ATc2, miniA03ATd, miniA03ATe1, miniA03ATe2, miniA03ATf, miniA03ATg), by = "rec")
 
+# create variable of total BDI score
+df <- df %>% mutate(bdi_total = rowSums(select(., starts_with("BDI"))))
+
 # create outcome variable
 df <- df %>% 
-      mutate(bipolar = case_when(
-                    # bipolar
-                    TB_erros == 1 | TB_erros == 2 ~ 0,
-                    TB_erros == 3 ~ 1
-                ))
+      mutate(dep_severa = case_when(
+                            # mild depression
+                            bdi_total <= 11 &
+                            TB_erros != 3 ~ 0,
+                            # moderate depression
+                            bdi_total >= 12 & bdi_total <= 24 &
+                            TB_erros != 3 ~ 1,
+                            # severe depression
+                            bdi_total > 24 &
+                            TB_erros != 3 ~ 2
+                      ))
+
+df <- df %>% 
+      mutate(dep_dic = case_when(
+                            # mild/moderate depression
+                            dep_severa == 0 | dep_severa == 1 ~ 0,
+                            # severe depression
+                            dep_severa == 2 ~ 1
+                      ))
 
 # subset dataframe and select variables included in model
 matrix <- df %>%
-          filter(., (bipolar == 0 | bipolar == 1)) %>%
-          select(., bipolar, a03sexo, a05idade, abepdicotomica, cordapele, escolaridade,
+          filter(., (dep_dic == 0 | dep_dic == 1)) %>%
+          select(., dep_dic, a03sexo, a05idade, abepdicotomica, cordapele, escolaridade,
                     a36relaciona, b01famil1, b04interna1, b03med1, b06tentsu1, b08famil2,
                     b10med2, b13tentsu2, uso_crackandcocaina, nemtrabnemestuda,
                     a16tratpsic, a30interp, moracomalgunsdospais,
@@ -127,7 +144,7 @@ matrix$a30interp <- as.factor(matrix$a30interp)
 matrix$moracomalgunsdospais <- as.factor(matrix$moracomalgunsdospais)
 
 # label outcome variable
-matrix$bipolar <- factor(matrix$bipolar, labels=c("No", "Yes"))
+matrix$dep_dic <- factor(matrix$dep_dic, labels=c("No", "Yes"))
 
 #matrix <- matrix %>%
 #          select(., -alucinogenosabudep)
@@ -141,11 +158,11 @@ matrix$bipolar <- factor(matrix$bipolar, labels=c("No", "Yes"))
 #str(matrix)
 
 # proportions
-prop.table(table(matrix$bipolar))
+prop.table(table(matrix$dep_dic))
 
 ##### Creating Train/Test holdout partitions #####
 set.seed(200)
-partitions <- createDataPartition(matrix$bipolar, p=0.75, list=FALSE)
+partitions <- createDataPartition(matrix$dep_dic, p=0.75, list=FALSE)
 train_matrix <- matrix[partitions,]
 test_matrix <- matrix[-partitions,]
 
@@ -179,14 +196,14 @@ for (i in names(train_matrix)){
 
 ##### Outcome Levels #####
 # Just checking if the outcome levels of training and test dataset keep the same proportion
-prop.table(table(train_matrix$bipolar))
-prop.table(table(test_matrix$bipolar))
+prop.table(table(train_matrix$dep_dic))
+prop.table(table(test_matrix$dep_dic))
 
 
 ##### Feature Selection #####
 # Remove by correlation (removed alcohol related (> 0.9))
 #library(polycor)
-#correlate <- train_matrix[,-which(names(train_matrix) == "bipolar")]
+#correlate <- train_matrix[,-which(names(train_matrix) == "dep_dic")]
 #correlationMatrix <- hetcor(correlate)
 #highlyCorrelated <- findCorrelation(correlationMatrix, cutoff=0.5)
 #print(highlyCorrelated)
@@ -199,29 +216,29 @@ prop.table(table(test_matrix$bipolar))
 train_control <- trainControl(method="repeatedcv", number=10, repeats=10, savePredictions=TRUE,
                               classProbs=TRUE, summaryFunction=twoClassSummary)
 
-f_no = table(train_matrix$bipolar)[1]
-f_yes = table(train_matrix$bipolar)[2]
+f_no = table(train_matrix$dep_dic)[1]
+f_yes = table(train_matrix$dep_dic)[2]
 w_no = (f_yes)/(f_no+f_yes)
 w_yes = (f_no)/(f_no+f_yes)
-weights <- ifelse(train_matrix$bipolar == "No", w_no, w_yes)
+weights <- ifelse(train_matrix$dep_dic == "No", w_no, w_yes)
 
-model <- train(bipolar ~ ., data=train_matrix,
+model <- train(dep_dic ~ ., data=train_matrix,
                      trControl=train_control, weights=weights, method="glmnet")
 predictions <- predict(model, test_matrix)
 predictions_prob <- predict(model, test_matrix, type="prob")
-confusionMatrix(predictions, test_matrix$bipolar, positive="Yes")
+confusionMatrix(predictions, test_matrix$dep_dic, positive="Yes")
 library(pROC)
-roc_curve = roc(test_matrix$bipolar, predictions_prob[, 2], levels=c("Yes","No"))
+roc_curve = roc(test_matrix$dep_dic, predictions_prob[, 2], levels=c("Yes","No"))
 prepare_risk = predictions_prob
-prepare_risk["outcome"] = test_matrix$bipolar
+prepare_risk["outcome"] = test_matrix$dep_dic
 
 sensitivities = data.frame(roc_curve$sensitivities)
 specificities = data.frame(roc_curve$specificities)
-write.csv(sensitivities, file="/home/pepper/dox/repos/amanda-masters/data/bd-conversion/sensitivities.csv")
-write.csv(specificities, file="/home/pepper/dox/repos/amanda-masters/data/bd-conversion/specificities.csv")
-write.csv(prepare_risk, file="/home/pepper/dox/repos/amanda-masters/data/bd-conversion/predictions.csv")
+write.csv(sensitivities, file="sensitivities.csv")
+write.csv(specificities, file="specificities.csv")
+write.csv(prepare_risk, file="predictions.csv")
 
 varImp(model)$importance %>% as.data.frame() %>% arrange(desc(Overall)) %>% head(5)
 importance = varImp(model)
 importance = importance$importance
-write.csv(importance, file="/home/pepper/dox/repos/amanda-masters/data/bd-conversion/importance.csv")
+write.csv(importance, file="importance.csv")
