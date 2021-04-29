@@ -20,8 +20,9 @@ colnames(df_josi)[colnames(df_josi) == "a02rec"] <- "rec"
 ## 8 values in all variables from third part except e2
 ## miniA11 and A12 have lots of 99 values
 df <- left_join(df, df_josi %>%
-   select(rec, starts_with("CTQ"), miniA11, miniA12, miniA03ATa, miniA03ATb, miniA03ATc1,
-          miniA03ATc2, miniA03ATd, miniA03ATe1, miniA03ATe2, miniA03ATf, miniA03ATg), by = "rec")
+   select(rec, starts_with(c("CTQ", "Abuso", "Negligencia", "cluster")), miniA11, miniA12,
+          miniA03ATa, miniA03ATb, miniA03ATc1, miniA03ATc2, miniA03ATd, miniA03ATe1,
+          miniA03ATe2, miniA03ATf, miniA03ATg), by = "rec")
 
 # create outcome variable
 df <- df %>% 
@@ -47,13 +48,25 @@ matrix <- df %>%
           filter(., (recorrencia_mdd == 0 | recorrencia_mdd == 1)) %>%
           select(., recorrencia_mdd, a03sexo, a05idade, abepdicotomica, cordapele, escolaridade,
                     a36relaciona, b01famil1, b04interna1, b03med1, b06tentsu1, b08famil2,
-                    b10med2, b13tentsu2, uso_crackandcocaina, nemtrabnemestuda,
-                    a16tratpsic, a30interp, moracomalgunsdospais,
+                    b10med2, b13tentsu2, nemtrabnemestuda, fobiasocialatual, fobiaespatual,
+                    tpanicoatual, a16tratpsic, a30interp, moracomalgunsdospais,
                     tagatual, teptatual, tocatual, agorafobiaatual, esquizoide, ansiedade,
                     esquizotipico, paranoide, histrionico, narcisista, borderline, anti_social,
                     evitativo, dependente, compulsivo, alcoolabudep, maconhaabudep,
                     alucinogenosabudep, abudepoutrasdrogas, abudepoutrasdrogasshipnoticos,
                     cigarroabudep, suiciderisk_MINI, CTQ)
+#matrix <- df %>%
+#          filter(., (recorrencia_mdd == 0 | recorrencia_mdd == 1)) %>%
+#          select(., recorrencia_mdd, a03sexo, a05idade, abepdicotomica, cordapele, escolaridade,
+#                    a36relaciona, b01famil1, b04interna1, b03med1, b06tentsu1, b08famil2,
+#                    b10med2, b13tentsu2, nemtrabnemestuda,
+#                    a16tratpsic, a30interp, moracomalgunsdospais,
+#                    tagatual, teptatual, tocatual, agorafobiaatual, clusterA, clusterB, clusterC,
+#                    alcoolabudep, maconhaabudep,
+#                    alucinogenosabudep, abudepoutrasdrogas, abudepoutrasdrogasshipnoticos,
+#                    cigarroabudep, suiciderisk_MINI, AbusoSexual, AbusoFisico, AbusoEmocional,
+#                    NegligenciaFisica, NegligenciaEmocional)
+
 # correct wrong codification
 matrix$alucinogenosabudep[is.na(matrix$alucinogenosabudep)] <- 2
 matrix$b01famil1[matrix$b01famil1 == 3 | matrix$b01famil1 == 4] <- 1
@@ -132,11 +145,13 @@ matrix$b06tentsu1 <- as.factor(matrix$b06tentsu1)
 matrix$b08famil2 <- as.factor(matrix$b08famil2)
 matrix$b10med2 <- as.factor(matrix$b10med2)
 matrix$b13tentsu2 <- as.factor(matrix$b13tentsu2)
-matrix$uso_crackandcocaina <- as.factor(matrix$uso_crackandcocaina)
 matrix$nemtrabnemestuda <- as.factor(matrix$nemtrabnemestuda)
 matrix$a16tratpsic <- as.factor(matrix$a16tratpsic)
 matrix$a30interp <- as.factor(matrix$a30interp)
 matrix$moracomalgunsdospais <- as.factor(matrix$moracomalgunsdospais)
+matrix$fobiasocialatual <- as.factor(matrix$fobiasocialatual)
+matrix$fobiaespatual <- as.factor(matrix$fobiaespatual)
+matrix$tpanicoatual <- as.factor(matrix$tpanicoatual)
 
 # label outcome variable
 matrix$recorrencia_mdd <- factor(matrix$recorrencia_mdd, labels=c("No", "Yes"))
