@@ -21,3 +21,17 @@
 - Funcional e disfuncional - independente do diagnóstico (colocar diagnóstico no modelo) - baixa cognição talvez
 
 - MANDAR AMANHÃ DE NOITE
+- Pessoal não está medicado - DIFERENCIAL
+
+# Reunião dia 29/04/2021
+- Transtorno personalidade
+- Trauma geral
+- Dois modelos - um para predizer recorrencia/persistencia - um modelo para predizer a depressão grave
+- Excluir depressão grave do baseline e/ou com sintomas psicoticos atuais - nao rola
+- Tirar os psicoticos
+
+- Tirava uso abusivo, antidepressivo, psicoticos e depressão c suicide risk atual 
+
+- Retirar psicoticos e suicide risk (plano ou tentativa de suicídio atual) (miniC04 e miniC05 / tpsicoticoatual)
+
+- Modelo de recorrência (igual) e severidade (BDI > 24 & BDI <= 24)

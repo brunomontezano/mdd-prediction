@@ -5,6 +5,7 @@ library(purrr)
 # read dataframe
 df <- read.csv('../data/banco-conversao-16-10-20.csv')
 df_josi <- read.csv('../data/banco-conversao-josi.csv')
+df_lu <- read.csv('../data/banco-apesm-3-anos.csv')
 
 # check dataframe structure
 #str(df) 
@@ -14,6 +15,7 @@ df <- df %>% filter(., !is.na(mora_t2))
 
 # rename rec variable from 2nd dataset
 colnames(df_josi)[colnames(df_josi) == "a02rec"] <- "rec"
+colnames(df_lu)[colnames(df_lu) == "a02rec"] <- "rec"
 
 # add variables from another dataset
 df <- left_join(df, df_josi %>%
@@ -21,8 +23,18 @@ df <- left_join(df, df_josi %>%
           miniA03ATa, miniA03ATb, miniA03ATc1, miniA03ATc2, miniA03ATd, miniA03ATe1,
           miniA03ATe2, miniA03ATf, miniA03ATg), by = "rec")
 
+df <- left_join(df, df_lu %>%
+   select(rec, miniC04, miniC05), by = "rec")
+
 # create variable of total BDI score
 df <- df %>% mutate(bdi_total = rowSums(select(., starts_with("BDI"))))
+
+# remove observations with suicide risk and psychotic disorder
+df <- df %>% filter(., !(miniC04 == 10 | miniC05 == 10 | tpsicoticoatual == 2))
+
+# classificar entre controle e dep grave e testa nos moderados
+# treinar com leve e severo, deve ser tirado na hora de treinar o moderado
+# de fato não ter moderado no treino
 
 # create outcome variable
 df <- df %>% 
@@ -41,9 +53,9 @@ df <- df %>%
 df <- df %>% 
       mutate(dep_dic = case_when(
                             # mild/moderate depression
-                            dep_severa == 0 | dep_severa == 1 ~ 0,
+                            dep_severa == 0 ~ 0,
                             # severe depression
-                            dep_severa == 2 ~ 1
+                            dep_severa == 1 | dep_severa == 2 ~ 1
                       ))
 
 # subset dataframe and select variables included in model
@@ -111,7 +123,6 @@ matrix$b13tentsu2[matrix$b13tentsu2 == 3] <- 1
 #  discard(~sum(is.na(.x))/length(.x)* 100 >= 10)
 
 # int to factor
-
 
 # miniA11 - idade primeiro ep. depressivo
 # miniA12 - quantos períodos distintos de depressao?
@@ -246,6 +257,7 @@ roc_curve = roc(test_matrix$dep_dic, predictions_prob[, 2], levels=c("Yes","No")
 prepare_risk = predictions_prob
 prepare_risk["outcome"] = test_matrix$dep_dic
 
+
 sensitivities = data.frame(roc_curve$sensitivities)
 specificities = data.frame(roc_curve$specificities)
 write.csv(sensitivities, file="sensitivities.csv")
@@ -256,3 +268,13 @@ varImp(model)$importance %>% as.data.frame() %>% arrange(desc(Overall)) %>% head
 importance = varImp(model)
 importance = importance$importance
 write.csv(importance, file="importance.csv")
+
+# test plot
+
+prepare_risk <- prepare_risk %>% as.data.frame() %>% 
+  mutate(tertiles = ntile(Yes, 3))
+
+prepare_risk %>% 
+    mutate(y = 1) %>%
+    ggplot(aes(x = Yes, y = y, color = as.factor(tertiles))) + geom_point()
+

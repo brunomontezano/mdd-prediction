@@ -5,6 +5,7 @@ library(purrr)
 # read dataframe
 df <- read.csv('../data/banco-conversao-16-10-20.csv')
 df_josi <- read.csv('../data/banco-conversao-josi.csv')
+df_lu <- read.csv('../data/banco-apesm-3-anos.csv')
 
 # check dataframe structure
 #str(df) 
@@ -14,6 +15,7 @@ df <- df %>% filter(., !is.na(mora_t2))
 
 # rename rec variable from 2nd dataset
 colnames(df_josi)[colnames(df_josi) == "a02rec"] <- "rec"
+colnames(df_lu)[colnames(df_lu) == "a02rec"] <- "rec"
 
 # add variables from another dataset
 df <- left_join(df, df_josi %>%
@@ -21,8 +23,14 @@ df <- left_join(df, df_josi %>%
           miniA03ATa, miniA03ATb, miniA03ATc1, miniA03ATc2, miniA03ATd, miniA03ATe1,
           miniA03ATe2, miniA03ATf, miniA03ATg), by = "rec")
 
+df <- left_join(df, df_lu %>%
+   select(rec, miniC04, miniC05), by = "rec")
+
 # create variable of total BDI score
 df <- df %>% mutate(bdi_total = rowSums(select(., starts_with("BDI"))))
+
+# remove observations with suicide risk and psychotic disorder
+df <- df %>% filter(., !(miniC04 == 10 | miniC05 == 10 | tpsicoticoatual == 2))
 
 # create outcome variable
 df <- df %>% 
