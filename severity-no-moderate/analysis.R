@@ -1,11 +1,12 @@
+# TRAIN WITHOUT MODERATE AND TEST WITH MODERATE AND TEST ON MODERATE AND 30% OF MILD/SEVERE
 library(caret)
 library(dplyr)
 library(purrr)
 
 # read dataframe
-df <- read.csv('../data/banco-conversao-16-10-20.csv')
-df_josi <- read.csv('../data/banco-conversao-josi.csv')
-df_lu <- read.csv('../data/banco-apesm-3-anos.csv')
+df <- read.csv('/home/pepper/dox/repos/amanda-masters/data/banco-conversao-16-10-20.csv')
+df_josi <- read.csv('/home/pepper/dox/repos/amanda-masters/data/banco-conversao-josi.csv')
+df_lu <- read.csv('/home/pepper/dox/repos/amanda-masters/data/banco-apesm-3-anos.csv')
 
 # check dataframe structure
 #str(df) 
@@ -19,15 +20,15 @@ colnames(df_lu)[colnames(df_lu) == "a02rec"] <- "rec"
 
 # add variables from another dataset
 df <- left_join(df, df_josi %>%
-   select(rec, starts_with(c("CTQ", "Abuso", "Negligencia", "cluster")), miniA11, miniA12,
+   dplyr::select(rec, starts_with(c("CTQ", "Abuso", "Negligencia", "cluster")), miniA11, miniA12,
           miniA03ATa, miniA03ATb, miniA03ATc1, miniA03ATc2, miniA03ATd, miniA03ATe1,
           miniA03ATe2, miniA03ATf, miniA03ATg), by = "rec")
 
 df <- left_join(df, df_lu %>%
-   select(rec, miniC04, miniC05), by = "rec")
+   dplyr::select(rec, miniC04, miniC05), by = "rec")
 
 # create variable of total BDI score
-df <- df %>% mutate(bdi_total = rowSums(select(., starts_with("BDI"))))
+df <- df %>% mutate(bdi_total = rowSums(dplyr::select(., starts_with("BDI"))))
 
 # remove observations with suicide risk and psychotic disorder
 df <- df %>% filter(., !(miniC04 == 10 | miniC05 == 10 | tpsicoticoatual == 2))
@@ -49,7 +50,7 @@ df <- df %>%
 # subset dataframe and select variables included in model
 matrix <- df %>%
           filter(., (dep_severa == 0 | dep_severa == 2)) %>%
-          select(., dep_severa, a03sexo, a05idade, abepdicotomica, cordapele, escolaridade,
+          dplyr::select(., dep_severa, a03sexo, a05idade, abepdicotomica, cordapele, escolaridade,
                     a36relaciona, b01famil1, b04interna1, b03med1, b06tentsu1, b08famil2,
                     b10med2, b13tentsu2, nemtrabnemestuda,
                     a16tratpsic, a30interp, moracomalgunsdospais, tpanicoatual, fobiaespatual,
@@ -238,9 +239,93 @@ weights <- ifelse(train_matrix$dep_severa == "No", w_no, w_yes)
 
 model <- train(dep_severa ~ ., data=train_matrix,
                      trControl=train_control, weights=weights, method="glmnet")
-predictions <- predict(model, test_matrix)
-predictions_prob <- predict(model, test_matrix, type="prob")
-confusionMatrix(predictions, test_matrix$dep_severa, positive="Yes")
+
+moderados <- df %>% filter(., dep_severa == 1) %>% select(names(matrix))
+
+moderados$alucinogenosabudep[is.na(moderados$alucinogenosabudep)] <- 2
+moderados$b01famil1[moderados$b01famil1 == 3 | moderados$b01famil1 == 4] <- 1
+moderados$b04interna1[moderados$b04interna1 == 3 | moderados$b04interna1 == 4] <- 1
+moderados$b03med1[moderados$b03med1 == 3 | moderados$b03med1 == 4] <- 1
+moderados$b06tentsu1[moderados$b06tentsu1 == 3] <- 1
+moderados$b08famil2[moderados$b08famil2 == 3 | moderados$b08famil2 == 4] <- 1
+moderados$b10med2[moderados$b10med2 == 3 | moderados$b10med2 == 4] <- 1
+moderados$b13tentsu2[moderados$b13tentsu2 == 3] <- 1
+
+moderados$a03sexo <- as.factor(moderados$a03sexo)
+moderados$abepdicotomica <- as.factor(moderados$abepdicotomica)
+moderados$cordapele <- as.factor(moderados$cordapele)
+moderados$a36relaciona <- as.factor(moderados$a36relaciona)
+moderados$tagatual <- as.factor(moderados$tagatual)
+moderados$teptatual <-  as.factor(moderados$teptatual)
+moderados$tocatual <- as.factor(moderados$tocatual)
+moderados$agorafobiaatual <- as.factor(moderados$agorafobiaatual)
+moderados$alcoolabudep <- as.factor(moderados$alcoolabudep)
+moderados$maconhaabudep <- as.factor(moderados$maconhaabudep)
+moderados$alucinogenosabudep <- as.factor(moderados$alucinogenosabudep)
+moderados$abudepoutrasdrogas <- as.factor(moderados$abudepoutrasdrogas)
+moderados$abudepoutrasdrogasshipnoticos <- as.factor(moderados$abudepoutrasdrogasshipnoticos)
+moderados$cigarroabudep <- as.factor(moderados$cigarroabudep)
+moderados$suiciderisk_MINI <- as.factor(moderados$suiciderisk_MINI)
+moderados$b01famil1 <- as.factor(moderados$b01famil1)
+moderados$b04interna1 <- as.factor(moderados$b04interna1)
+moderados$b03med1 <- as.factor(moderados$b03med1)
+moderados$b06tentsu1 <- as.factor(moderados$b06tentsu1)
+moderados$b08famil2 <- as.factor(moderados$b08famil2)
+moderados$b10med2 <- as.factor(moderados$b10med2)
+moderados$b13tentsu2 <- as.factor(moderados$b13tentsu2)
+moderados$nemtrabnemestuda <- as.factor(moderados$nemtrabnemestuda)
+moderados$a16tratpsic <- as.factor(moderados$a16tratpsic)
+moderados$a30interp <- as.factor(moderados$a30interp)
+moderados$moracomalgunsdospais <- as.factor(moderados$moracomalgunsdospais)
+moderados$fobiasocialatual <- as.factor(moderados$fobiasocialatual)
+moderados$fobiaespatual <- as.factor(moderados$fobiaespatual)
+moderados$tpanicoatual <- as.factor(moderados$tpanicoatual)
+
+for (i in names(moderados)){
+  if (is.factor(moderados[,i])) {
+    print(i)
+    mode_value = getmode(moderados[,i])
+    #recorded_values[1,i] = mode_value
+    moderados[is.na(moderados[,i]),i] = mode_value
+  } else {
+    print(i)
+    mean_value = mean(moderados[,i], na.rm=TRUE)
+    #recorded_values[1,i] = mean_value
+    moderados[is.na(moderados[,i]),i] = mean_value
+  }
+  
+}
+
+grupao <- rbind(moderados, test_matrix)
+
+str(grupao[complete.cases(grupao),])
+
+predictions_mod <- predict(model, grupao)
+predictions_prob_mod <- predict(model, grupao, type="prob")
+plot(predictions_prob$Yes)
+confusionMatrix(predictions, moderados$dep_severa, positive="Yes")
+
+predictions_25 <- predict(model, test_matrix)
+predictions_prob_25 <- predict(model, test_matrix, type="prob")
+confusionMatrix(predictions_25, test_matrix$dep_severa, positive="Yes")
+
+### PEGAR A COLUNA DO DIAGNÓSTICO ###
+
+diag <- grupao %>% select(dep_severa)
+ds_plot <- cbind(predictions_prob_mod, diag)
+
+ds_plot <- ds_plot %>% mutate(outcome = case_when(
+                                        dep_severa == "No" ~ "Leve",
+                                        dep_severa == "Yes" ~ "Severa",
+                                        dep_severa == "1" ~ "Moderada"
+))
+
+ds_plot <- ds_plot %>% select(No, Yes, outcome)
+
+# plot
+ds_plot %>% ggplot(aes(x = Yes, y = 1, fill = outcome)) + geom_dotplot(alpha = 0.8)
+ds_plot %>% ggplot(aes(x = Yes, y = 1, fill = outcome)) + geom_point(alpha = 0.8)
+
 library(pROC)
 roc_curve = roc(test_matrix$dep_severa, predictions_prob[, 2], levels=c("Yes","No"))
 prepare_risk = predictions_prob

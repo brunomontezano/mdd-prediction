@@ -1,67 +1,69 @@
+### Load packages ###
 library(caret)
 library(dplyr)
 library(purrr)
 
-# read dataframe
+### Read datasets ###
+setwd("/home/pepper/dox/repos/amanda-masters/severity/")
 df <- read.csv('../data/banco-conversao-16-10-20.csv')
 df_josi <- read.csv('../data/banco-conversao-josi.csv')
 df_lu <- read.csv('../data/banco-apesm-3-anos.csv')
 
-# check dataframe structure
-#str(df) 
-
-# filter for 468 from 2nd wave
+### Select 2nd wave observations ###
 df <- df %>% filter(., !is.na(mora_t2))
 
-# rename rec variable from 2nd dataset
+# Rename identification variables ###
 colnames(df_josi)[colnames(df_josi) == "a02rec"] <- "rec"
 colnames(df_lu)[colnames(df_lu) == "a02rec"] <- "rec"
 
-# add variables from another dataset
+# Add variables from supplementary datasets ###
 df <- left_join(df, df_josi %>%
-   select(rec, starts_with(c("CTQ", "Abuso", "Negligencia", "cluster")), miniA11, miniA12,
+   dplyr::select(rec, starts_with(c("CTQ", "Abuso", "Negligencia", "cluster")), miniA11, miniA12,
           miniA03ATa, miniA03ATb, miniA03ATc1, miniA03ATc2, miniA03ATd, miniA03ATe1,
           miniA03ATe2, miniA03ATf, miniA03ATg), by = "rec")
 
 df <- left_join(df, df_lu %>%
-   select(rec, miniC04, miniC05), by = "rec")
+   dplyr::select(rec, miniC04, miniC05), by = "rec")
 
-# create variable of total BDI score
-df <- df %>% mutate(bdi_total = rowSums(select(., starts_with("BDI"))))
+### Calculate BDI total score ###
+df <- df %>% mutate(bdi_total = rowSums(dplyr::select(., starts_with("BDI"))))
 
-# remove observations with suicide risk and psychotic disorder
-df <- df %>% filter(., !(miniC04 == 10 | miniC05 == 10 | tpsicoticoatual == 2))
+### Remove severely depressed subjects (suicide plan or attempt, or psychotic disorder) ###
+df <- df %>% dplyr::filter(., !(miniC04 == 10 | miniC05 == 10 | tpsicoticoatual == 2))
 
-# classificar entre controle e dep grave e testa nos moderados
-# treinar com leve e severo, deve ser tirado na hora de treinar o moderado
-# de fato não ter moderado no treino
+### Dichotomize civil status variable ###
 
-# create outcome variable
+#df <- df %>% mutate(., vive_companheiro = case_when(
+#                    a36relaciona == 1 | a36relaciona == 5 | a36relaciona == 6 ~ 0,
+#                    a36relaciona == 2 | a36relaciona == 3 | a36relaciona == 4 ~ 1
+#))
+
+### Create outcome variable ###
 df <- df %>% 
       mutate(dep_severa = case_when(
-                            # mild depression
+                            # Mild depression
                             bdi_total <= 11 &
                             TB_erros != 3 ~ 0,
-                            # moderate depression
+                            # Moderate depression
                             bdi_total >= 12 & bdi_total <= 24 &
                             TB_erros != 3 ~ 1,
-                            # severe depression
+                            # Severe depression
                             bdi_total > 24 &
                             TB_erros != 3 ~ 2
                       ))
 
 df <- df %>% 
       mutate(dep_dic = case_when(
-                            # mild/moderate depression
+                            # Mild depression
                             dep_severa == 0 ~ 0,
-                            # severe depression
+                            # Severe/moderate depression
                             dep_severa == 1 | dep_severa == 2 ~ 1
                       ))
 
-# subset dataframe and select variables included in model
+### Subset dataset to select outcome and features included in model ###
 matrix <- df %>%
           filter(., (dep_dic == 0 | dep_dic == 1)) %>%
-          select(., dep_dic, a03sexo, a05idade, abepdicotomica, cordapele, escolaridade,
+          dplyr::select(., dep_dic, a03sexo, a05idade, abepdicotomica, cordapele, escolaridade,
                     a36relaciona, b01famil1, b04interna1, b03med1, b06tentsu1, b08famil2,
                     b10med2, b13tentsu2, nemtrabnemestuda, tpanicoatual, fobiasocialatual,
                     fobiaespatual, a16tratpsic, a30interp, moracomalgunsdospais,
@@ -70,19 +72,8 @@ matrix <- df %>%
                     evitativo, dependente, compulsivo, alcoolabudep, maconhaabudep,
                     alucinogenosabudep, abudepoutrasdrogas, abudepoutrasdrogasshipnoticos,
                     cigarroabudep, suiciderisk_MINI, CTQ)
-#matrix <- df %>%
-#          filter(., (dep_dic == 0 | dep_dic == 1)) %>%
-#          select(., dep_dic, a03sexo, a05idade, abepdicotomica, cordapele, escolaridade,
-#                    a36relaciona, b01famil1, b04interna1, b03med1, b06tentsu1, b08famil2,
-#                    b10med2, b13tentsu2, nemtrabnemestuda,
-#                    a16tratpsic, a30interp, moracomalgunsdospais,
-#                    tagatual, teptatual, tocatual, agorafobiaatual, clusterA, clusterB, clusterC,
-#                    alcoolabudep, maconhaabudep,
-#                    alucinogenosabudep, abudepoutrasdrogas, abudepoutrasdrogasshipnoticos,
-#                    cigarroabudep, suiciderisk_MINI, AbusoSexual, AbusoFisico, AbusoEmocional,
-#                    NegligenciaFisica, NegligenciaEmocional)
 
-# correct wrong codification
+### Correct wrong codification ###
 matrix$alucinogenosabudep[is.na(matrix$alucinogenosabudep)] <- 2
 matrix$b01famil1[matrix$b01famil1 == 3 | matrix$b01famil1 == 4] <- 1
 matrix$b04interna1[matrix$b04interna1 == 3 | matrix$b04interna1 == 4] <- 1
@@ -91,53 +82,24 @@ matrix$b06tentsu1[matrix$b06tentsu1 == 3] <- 1
 matrix$b08famil2[matrix$b08famil2 == 3 | matrix$b08famil2 == 4] <- 1
 matrix$b10med2[matrix$b10med2 == 3 | matrix$b10med2 == 4] <- 1
 matrix$b13tentsu2[matrix$b13tentsu2 == 3] <- 1
-#matrix$miniA11[matrix$miniA11 == 99] <- ? 
-#matrix$miniA12[matrix$miniA12 == 99 | matrix$miniA12 == 168] <- ? 
-#matrix$miniA03ATa[matrix$miniA03ATa == 8] <- 0 
-#matrix$miniA03ATb[matrix$miniA03ATb == 8] <- 0 
 
-# counting NA values
-#sum(is.na(matrix$esquizoide)) # 60
-#sum(is.na(matrix$esquizotipico)) # 60
-#sum(is.na(matrix$paranoide)) # 60
-#sum(is.na(matrix$histrionico)) # 60
-#sum(is.na(matrix$narcisista)) # 60
-#sum(is.na(matrix$borderline)) # 60
-#sum(is.na(matrix$anti_social)) # 60
-#sum(is.na(matrix$evitativo)) # 60
-#sum(is.na(matrix$dependente)) # 60
-#sum(is.na(matrix$compulsivo)) # 60
-#sum(is.na(matrix$tagatual)) # 1
-#sum(is.na(matrix$teptatual)) # 1
-#sum(is.na(matrix$agorafobiaatual)) # 1
-#sum(is.na(matrix$alcoolabudep)) # 27
-#sum(is.na(matrix$maconhaabudep)) # 27
-#sum(is.na(matrix$alucinogenosabudep)) # 0
-#sum(is.na(matrix$cigarroabudep)) # 27
-#sum(is.na(matrix$abudepoutrasdrogas)) # 27
-#sum(is.na(matrix$abudepoutrasdrogasshipnoticos)) # 27
-#sum(is.na(matrix$suiciderisk_MINI)) # 2
+# Legend
+# miniA11 - Age on first depressive episode
+# miniA12 - How many distinct depressive episodes?
+# b01famil1 - Maternal psychiatric illness
+# b04interna1 - Maternal psychiatric hospitalization
+# b03med1 - Maternal psychiatric medication
+# b06tentsu1 - Maternal suicide attempt
+# b08famil2 - Paternal psychiatric illness
+# b10med2 - Paternal psychiatric medication
+# b13tentsu2 - Paternal suicide attempt
+# uso_crackandcocaina - Use of crack or cocaine
+# nemtrabnemestuda - Current occupation
+# a16tratpsic - Lifetime psychological treatment
+# a30interp - Lifetime hospitalization
+# moracomalgunsdospais - Live with parents
 
-# remove variables with 10% or more missings
-#matrix <- matrix %>% 
-#  discard(~sum(is.na(.x))/length(.x)* 100 >= 10)
-
-# int to factor
-
-# miniA11 - idade primeiro ep. depressivo
-# miniA12 - quantos períodos distintos de depressao?
-# b01famil1 - mãe doença psi
-# b04interna1 - internação materna
-# b03med1 - mãe medicamento psi
-# b06tentsu1 - tentativa suicídio mãe
-# b08famil2 - pai doença psi
-# b10med2 - pai medicamento psi
-# b13tentsu2 - tentativa suicídio pai
-# uso_crackandcocaina - uso crack/cocaina
-# nemtrabnemestuda - ocupacao atual
-# a16tratpsic - tratamento psicologico ao longo da vida
-# a30interp - internação ao longo da vida
-# moracomalgunsdospais
+### Integer variables to factor ###
 matrix$a03sexo <- as.factor(matrix$a03sexo)
 matrix$abepdicotomica <- as.factor(matrix$abepdicotomica)
 matrix$cordapele <- as.factor(matrix$cordapele)
@@ -167,22 +129,18 @@ matrix$moracomalgunsdospais <- as.factor(matrix$moracomalgunsdospais)
 matrix$fobiasocialatual <- as.factor(matrix$fobiasocialatual)
 matrix$fobiaespatual <- as.factor(matrix$fobiaespatual)
 matrix$tpanicoatual <- as.factor(matrix$tpanicoatual)
+#matrix$vive_companheiro <- as.factor(matrix$vive_companheiro)
 
-# label outcome variable
+### Label outcome variable ###
 matrix$dep_dic <- factor(matrix$dep_dic, labels=c("No", "Yes"))
 
-#matrix <- matrix %>%
-#          select(., -alucinogenosabudep)
-
 ### Remove additional variables ###
-#column_list <- list("phq_1", "phq_2", "phq_total", "cotas", "suicidal_attempt",
+#for_removal <- list("phq_1", "phq_2", "phq_total", "cotas", "suicidal_attempt",
 #                    "alcohol", "alcohol_dose", "alcohol_binge", "Risk_Stratification_Alcohol",
 #                    "workload", "bullying_school", "psyc_diag", "Transexual")
-#matrix <- matrix[,-which(names(matrix) %in% column_list)]
+#matrix <- matrix[,-which(names(matrix) %in% for_removal)]
 
-#str(matrix)
-
-# proportions
+### Proportions ###
 prop.table(table(matrix$dep_dic))
 
 ##### Creating Train/Test holdout partitions #####
@@ -191,6 +149,7 @@ partitions <- createDataPartition(matrix$dep_dic, p=0.75, list=FALSE)
 train_matrix <- matrix[partitions,]
 test_matrix <- matrix[-partitions,]
 
+### Get mode function ###
 getmode <- function(v) {
   uniqv <- unique(v)
   uniqv[which.max(tabulate(match(v, uniqv)))]
@@ -214,9 +173,7 @@ for (i in names(train_matrix)){
   
 }
 
-#str(matrix)
-
-# remove observations with NA values
+### Remove observations with NA values ###
 #matrix <- matrix[complete.cases(matrix), ]
 
 ##### Outcome Levels #####
@@ -226,7 +183,7 @@ prop.table(table(test_matrix$dep_dic))
 
 
 ##### Feature Selection #####
-# Remove by correlation (removed alcohol related (> 0.9))
+# Remove by correlation
 #library(polycor)
 #correlate <- train_matrix[,-which(names(train_matrix) == "dep_dic")]
 #correlationMatrix <- hetcor(correlate)
@@ -237,44 +194,51 @@ prop.table(table(test_matrix$dep_dic))
 #x = train_matrix[,33]
 #y = train_matrix[,-33]
 
-##### Training #####
+##### Training control #####
 train_control <- trainControl(method="repeatedcv", number=10, repeats=10, savePredictions=TRUE,
                               classProbs=TRUE, summaryFunction=twoClassSummary)
 
+### Calculating weights ###
 f_no = table(train_matrix$dep_dic)[1]
 f_yes = table(train_matrix$dep_dic)[2]
 w_no = (f_yes)/(f_no+f_yes)
 w_yes = (f_no)/(f_no+f_yes)
 weights <- ifelse(train_matrix$dep_dic == "No", w_no, w_yes)
 
-model <- train(dep_dic ~ ., data=train_matrix,
-                     trControl=train_control, weights=weights, method="glmnet")
+### Train model ###
+model <- train(dep_dic ~ .,
+               data=train_matrix,
+               trControl=train_control,
+               weights=weights,
+               method="glmnet")
+
+### Predictions ###
 predictions <- predict(model, test_matrix)
 predictions_prob <- predict(model, test_matrix, type="prob")
+
+### Confusion matrix ###
 confusionMatrix(predictions, test_matrix$dep_dic, positive="Yes")
+
+### ROC ###
 library(pROC)
 roc_curve = roc(test_matrix$dep_dic, predictions_prob[, 2], levels=c("Yes","No"))
+plot(roc_curve)
+
+### Predictions ###
 prepare_risk = predictions_prob
 prepare_risk["outcome"] = test_matrix$dep_dic
 
-
+### Sensitivities and specificities ###
 sensitivities = data.frame(roc_curve$sensitivities)
 specificities = data.frame(roc_curve$specificities)
 write.csv(sensitivities, file="sensitivities.csv")
 write.csv(specificities, file="specificities.csv")
 write.csv(prepare_risk, file="predictions.csv")
 
-varImp(model)$importance %>% as.data.frame() %>% arrange(desc(Overall)) %>% head(5)
+### Most important features arranged ###
+varImp(model)$importance %>% as.data.frame() %>% arrange(desc(Overall))# %>% head(5)
+
+### Importance ###
 importance = varImp(model)
 importance = importance$importance
 write.csv(importance, file="importance.csv")
-
-# test plot
-
-prepare_risk <- prepare_risk %>% as.data.frame() %>% 
-  mutate(tertiles = ntile(Yes, 3))
-
-prepare_risk %>% 
-    mutate(y = 1) %>%
-    ggplot(aes(x = Yes, y = y, color = as.factor(tertiles))) + geom_point()
-
