@@ -13,7 +13,7 @@
 ## Modelo 3
 - Modelo: Leve/moderado vs. Severo (excluindo não deprimidos)
 - Acurácia (0.62)
-- 107 vs 121
+- 107 (não severo) vs. 121 (severo)
 
 # Objetivos
 - Dizer se existem variáveis diferentes na hora de predizer depressão sim ou não
