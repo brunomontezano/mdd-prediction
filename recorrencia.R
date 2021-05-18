@@ -4,7 +4,7 @@ library(dplyr)
 library(purrr)
 
 ### Read datasets ###
-setwd("/home/pepper/dox/repos/amanda-masters/severity/")
+setwd("/home/pepper/dox/repos/amanda-masters/recorrencia/")
 df <- read.csv('../data/banco-conversao-16-10-20.csv')
 df_josi <- read.csv('../data/banco-conversao-josi.csv')
 df_lu <- read.csv('../data/banco-apesm-3-anos.csv')
@@ -33,43 +33,44 @@ df <- df %>% dplyr::filter(., !(miniC04 == 10 | miniC05 == 10 | tpsicoticoatual 
 
 ### Dichotomize civil status variable ###
 
-#df <- df %>% mutate(., vive_companheiro = case_when(
-#                    a36relaciona == 1 | a36relaciona == 5 | a36relaciona == 6 ~ 0,
-#                    a36relaciona == 2 | a36relaciona == 3 | a36relaciona == 4 ~ 1
-#))
+df <- df %>% mutate(., vive_companheiro = case_when(
+                    a36relaciona == 1 | a36relaciona == 5 | a36relaciona == 6 ~ 0,
+                    a36relaciona == 2 | a36relaciona == 3 | a36relaciona == 4 ~ 1
+))
 
 ### Create outcome variable ###
 df <- df %>% 
       mutate(dep_severa = case_when(
-                            # Mild depression
-                            bdi_total <= 11 &
+                            # No depression
+                            bdi_total <= 13 &
                             TB_erros != 3 ~ 0,
-                            # Moderate depression
-                            bdi_total >= 12 & bdi_total <= 24 &
+                            # Mild depression
+                            bdi_total >= 14 & bdi_total <= 19 &
                             TB_erros != 3 ~ 1,
+                            # Moderate depression
+                            bdi_total >= 20 & bdi_total <= 28 &
+                            TB_erros != 3 ~ 2,
                             # Severe depression
-                            bdi_total > 24 &
-                            TB_erros != 3 ~ 2
+                            bdi_total >= 29 &
+                            TB_erros != 3 ~ 3
                       ))
 
 df <- df %>% 
       mutate(dep_dic = case_when(
                             # Mild depression
-                            dep_severa == 0 ~ 0,
+                            dep_severa == 0  ~ 0,
                             # Severe/moderate depression
-                            dep_severa == 1 | dep_severa == 2 ~ 1
+                            dep_severa == 3 | dep_severa == 1 | dep_severa == 2 ~ 1
                       ))
 
 ### Subset dataset to select outcome and features included in model ###
 matrix <- df %>%
           filter(., (dep_dic == 0 | dep_dic == 1)) %>%
           dplyr::select(., dep_dic, a03sexo, a05idade, abepdicotomica, cordapele, escolaridade,
-                    a36relaciona, b01famil1, b04interna1, b03med1, b06tentsu1, b08famil2,
+                    vive_companheiro, b01famil1, b04interna1, b03med1, b06tentsu1, b08famil2,
                     b10med2, b13tentsu2, nemtrabnemestuda, tpanicoatual, fobiasocialatual,
                     fobiaespatual, a16tratpsic, a30interp, moracomalgunsdospais,
-                    tagatual, teptatual, tocatual, agorafobiaatual, esquizoide, ansiedade,
-                    esquizotipico, paranoide, histrionico, narcisista, borderline, anti_social,
-                    evitativo, dependente, compulsivo, alcoolabudep, maconhaabudep,
+                    tagatual, teptatual, tocatual, agorafobiaatual, clusterA, clusterB, clusterC, alcoolabudep, maconhaabudep,
                     alucinogenosabudep, abudepoutrasdrogas, abudepoutrasdrogasshipnoticos,
                     cigarroabudep, suiciderisk_MINI, CTQ)
 
@@ -103,7 +104,7 @@ matrix$b13tentsu2[matrix$b13tentsu2 == 3] <- 1
 matrix$a03sexo <- as.factor(matrix$a03sexo)
 matrix$abepdicotomica <- as.factor(matrix$abepdicotomica)
 matrix$cordapele <- as.factor(matrix$cordapele)
-matrix$a36relaciona <- as.factor(matrix$a36relaciona)
+matrix$vive_companheiro <- as.factor(matrix$vive_companheiro)
 matrix$tagatual <- as.factor(matrix$tagatual)
 matrix$teptatual <-  as.factor(matrix$teptatual)
 matrix$tocatual <- as.factor(matrix$tocatual)

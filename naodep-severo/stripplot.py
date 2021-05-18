@@ -4,7 +4,7 @@ sns.set_context("paper")
 sns.set_style('whitegrid')
 
 import pandas as pd
-df = pd.read_csv('ds_plot_prediction.csv')
+df = pd.read_csv('../data/ds_plot_prediction.csv')
 print(df)
 
 sns.boxplot(x="Yes", y="outcome", data=df)
