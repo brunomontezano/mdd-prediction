@@ -3,15 +3,16 @@
 ## Modelo 1
 - Modelo: Não deprimido vs. Leve/Moderado/Severo
 - Acurácia e modelo (0.69)
-- Boxplot (verificar)
+- Boxplot (pendente)
 
 ## Modelo 2
 - Modelo: Não deprimido vs. Severo (excluindo leves e moderados)
 - Acurácia e modelo (0.72)
-- Boxplot
+- Boxplot (gerado)
  
 ## Modelo 3
-- Modelo: Leve/moderado vs. Severo
+- Modelo: Leve/moderado vs. Severo (excluindo não deprimidos)
+- Acurácia (0.62)
 - 107 vs 121
 
 # Objetivos
