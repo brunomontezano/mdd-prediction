@@ -12,5 +12,6 @@ sns.stripplot(x='Yes', y='outcome', color=".3", data=df)
 
 plt.xlabel('Predições')
 plt.ylabel('Severidade')
+
 plt.tight_layout()
 plt.show()
