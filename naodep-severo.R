@@ -65,7 +65,7 @@ matrix <- df %>%
                     fobiasocialatual, tagatual, teptatual, tocatual, agorafobiaatual,
                     clusterA, clusterB, clusterC,
                     alcoolabudep, maconhaabudep,
-                    alucinogenosabudep, abudepoutrasdrogas, abudepoutrasdrogasshipnoticos,
+                    abudepoutrasdrogas, abudepoutrasdrogasshipnoticos,
                     cigarroabudep, suiciderisk_MINI, CTQ)
 #matrix <- df %>%
 #          filter(., (dep_severa == 0 | dep_severa == 2)) %>%
@@ -80,7 +80,6 @@ matrix <- df %>%
 #                    NegligenciaFisica, NegligenciaEmocional)
 
 # correct wrong codification
-matrix$alucinogenosabudep[is.na(matrix$alucinogenosabudep)] <- 2
 matrix$b01famil1[matrix$b01famil1 == 3 | matrix$b01famil1 == 4] <- 1
 matrix$b04interna1[matrix$b04interna1 == 3 | matrix$b04interna1 == 4] <- 1
 matrix$b03med1[matrix$b03med1 == 3 | matrix$b03med1 == 4] <- 1
@@ -145,7 +144,6 @@ matrix$tocatual <- as.factor(matrix$tocatual)
 matrix$agorafobiaatual <- as.factor(matrix$agorafobiaatual)
 matrix$alcoolabudep <- as.factor(matrix$alcoolabudep)
 matrix$maconhaabudep <- as.factor(matrix$maconhaabudep)
-matrix$alucinogenosabudep <- as.factor(matrix$alucinogenosabudep)
 matrix$abudepoutrasdrogas <- as.factor(matrix$abudepoutrasdrogas)
 matrix$abudepoutrasdrogasshipnoticos <- as.factor(matrix$abudepoutrasdrogasshipnoticos)
 matrix$cigarroabudep <- as.factor(matrix$cigarroabudep)
@@ -249,7 +247,6 @@ model <- train(dep_severa ~ ., data=train_matrix,
 
 moderados <- df %>% filter(., dep_severa == 1 | dep_severa == 2) %>% select(names(matrix))
 
-moderados$alucinogenosabudep[is.na(moderados$alucinogenosabudep)] <- 2
 moderados$b01famil1[moderados$b01famil1 == 3 | moderados$b01famil1 == 4] <- 1
 moderados$b04interna1[moderados$b04interna1 == 3 | moderados$b04interna1 == 4] <- 1
 moderados$b03med1[moderados$b03med1 == 3 | moderados$b03med1 == 4] <- 1
@@ -268,7 +265,6 @@ moderados$tocatual <- as.factor(moderados$tocatual)
 moderados$agorafobiaatual <- as.factor(moderados$agorafobiaatual)
 moderados$alcoolabudep <- as.factor(moderados$alcoolabudep)
 moderados$maconhaabudep <- as.factor(moderados$maconhaabudep)
-moderados$alucinogenosabudep <- as.factor(moderados$alucinogenosabudep)
 moderados$abudepoutrasdrogas <- as.factor(moderados$abudepoutrasdrogas)
 moderados$abudepoutrasdrogasshipnoticos <- as.factor(moderados$abudepoutrasdrogasshipnoticos)
 moderados$cigarroabudep <- as.factor(moderados$cigarroabudep)
@@ -316,7 +312,7 @@ predictions_prob_mod <- predict(model, moderados, type="prob")
 
 ### PEGAR A COLUNA DO DIAGNÓSTICO ###
 
-pred_junto <- rbind(predictions_prob, predictions_prob_mod)
+pred_junto <- rbind(predictions_prob_mod, predictions_prob)
 
 diag <- moderados_teste %>% select(dep_severa)
 ds_plot <- cbind(pred_junto, diag)
@@ -329,17 +325,22 @@ ds_plot <- ds_plot %>% mutate(outcome = case_when(
 ))
 
 ds_plot <- ds_plot %>% select(No, Yes, outcome)
+ds_plot$outcome <- factor(ds_plot$outcome,
+                          levels = c("Sem depressão", "Leve", "Moderada", "Severa"),
+                          labels = c("Sem depressão", "Leve", "Moderada", "Severa"))
+
+ds_plot <- ds_plot %>% arrange(outcome)
 
 write.csv(ds_plot, "../data/ds_plot_prediction.csv", row.names = FALSE)
 
-set.seed(666)
-ds_plot %>%
-  mutate(outcome = forcats::fct_relevel(outcome, "Severa", "Moderada", "Leve", "Sem depressão")) %>%
-  ggplot(aes(x = Yes, y = outcome, color = outcome)) +
-  geom_boxplot() +
-  geom_jitter(alpha = 0.7, size = 3, width = 0, height = 0.1) +
-  labs(x = "Predições", y = "Severidade de depressão", color = "Severidade") +
-  theme(legend.position = "none", text = element_text(size = 18))# + coord_flip()
+#set.seed(666)
+#ds_plot %>%
+#  mutate(outcome = forcats::fct_relevel(outcome, "Severa", "Moderada", "Leve", "Sem depressão")) %>%
+#  ggplot(aes(x = Yes, y = outcome, color = outcome)) +
+#  geom_boxplot() +
+#  geom_jitter(alpha = 0.7, size = 3, width = 0, height = 0.1) +
+#  labs(x = "Predições", y = "Severidade de depressão", color = "Severidade") +
+#  theme(legend.position = "none", text = element_text(size = 18))# + coord_flip()
 
 library(pROC)
 roc_curve = roc(test_matrix$dep_severa, predictions_prob[, 2], levels=c("Yes","No"))

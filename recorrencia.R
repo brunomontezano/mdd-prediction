@@ -71,11 +71,10 @@ matrix <- df %>%
                     b10med2, b13tentsu2, nemtrabnemestuda, tpanicoatual, fobiasocialatual,
                     fobiaespatual, a16tratpsic, a30interp, moracomalgunsdospais,
                     tagatual, teptatual, tocatual, agorafobiaatual, clusterA, clusterB, clusterC, alcoolabudep, maconhaabudep,
-                    alucinogenosabudep, abudepoutrasdrogas, abudepoutrasdrogasshipnoticos,
+                    abudepoutrasdrogas, abudepoutrasdrogasshipnoticos,
                     cigarroabudep, suiciderisk_MINI, CTQ)
 
 ### Correct wrong codification ###
-matrix$alucinogenosabudep[is.na(matrix$alucinogenosabudep)] <- 2
 matrix$b01famil1[matrix$b01famil1 == 3 | matrix$b01famil1 == 4] <- 1
 matrix$b04interna1[matrix$b04interna1 == 3 | matrix$b04interna1 == 4] <- 1
 matrix$b03med1[matrix$b03med1 == 3 | matrix$b03med1 == 4] <- 1
@@ -111,7 +110,6 @@ matrix$tocatual <- as.factor(matrix$tocatual)
 matrix$agorafobiaatual <- as.factor(matrix$agorafobiaatual)
 matrix$alcoolabudep <- as.factor(matrix$alcoolabudep)
 matrix$maconhaabudep <- as.factor(matrix$maconhaabudep)
-matrix$alucinogenosabudep <- as.factor(matrix$alucinogenosabudep)
 matrix$abudepoutrasdrogas <- as.factor(matrix$abudepoutrasdrogas)
 matrix$abudepoutrasdrogasshipnoticos <- as.factor(matrix$abudepoutrasdrogasshipnoticos)
 matrix$cigarroabudep <- as.factor(matrix$cigarroabudep)

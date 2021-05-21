@@ -8,10 +8,10 @@ df = pd.read_csv('../data/ds_plot_prediction.csv')
 print(df)
 
 sns.boxplot(x="Yes", y="outcome", data=df)
-sns.stripplot(x='Yes', y='outcome', color=".3", data=df)
+sns.stripplot(x='Yes', y='outcome', linewidth=2, alpha=0.8, data=df)
 
 plt.xlabel('Predições')
 plt.ylabel('Severidade')
 
-plt.tight_layout()
+#plt.tight_layout()
 plt.show()

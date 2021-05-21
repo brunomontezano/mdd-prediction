@@ -35,3 +35,20 @@
 - Retirar psicoticos e suicide risk (plano ou tentativa de suicídio atual) (miniC04 e miniC05 / tpsicoticoatual)
 
 - Modelo de recorrência (igual) e severidade (BDI > 24 & BDI <= 24)
+
+# Variáveis
+
+Em cima dos 368 sujeitos, as seguintes variáveis clínicas e demográficas:
+
+- Sexo
+- Idade
+- Anos de estudo
+- ABEP dicotômica
+- Cor da pele
+- Vive com companheiro
+- Ocupação atual (nem trabalha nem estuda) 
+- Risco de suicídio da MINI
+
+- Substâncias (mesma separação de como entrou no modelo)
+- Histórico familiar de transtornos psiquiátricos
+- Ansiedades (separado)
