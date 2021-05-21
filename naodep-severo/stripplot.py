@@ -7,8 +7,8 @@ import pandas as pd
 df = pd.read_csv('../data/ds_plot_prediction.csv')
 print(df)
 
-sns.boxplot(x="Yes", y="outcome", data=df)
-sns.stripplot(x='Yes', y='outcome', linewidth=2, alpha=0.8, data=df)
+sns.boxplot(x="Yes", y="outcome", palette="Greys", data=df)
+sns.stripplot(x='Yes', y='outcome', linewidth=1, palette="Greys_r", data=df)
 
 plt.xlabel('Predições')
 plt.ylabel('Severidade')
