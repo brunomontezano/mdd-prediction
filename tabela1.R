@@ -65,7 +65,7 @@ labels = c("No", "Yes"))
 
 amostra$nemtrabnemestuda <- factor(amostra$nemtrabnemestuda,
 levels = c(1,2),
-labels = c("Do not work/study", "Works/study"))
+labels = c("Does not work/study", "Works/study"))
 
 amostra$suiciderisk_MINI <- factor(amostra$suiciderisk_MINI,
 levels = c(0,1),
@@ -119,6 +119,17 @@ amostra$tocatual <- factor(amostra$tocatual,
 levels = c(1,2),
 labels = c("No", "Yes"))
 
+amostra$b08famil2[amostra$b08famil2 == 3 | amostra$b08famil2 == 4] <- 1
+amostra$b01famil1[amostra$b01famil1 == 3 | amostra$b01famil1 == 4] <- 1
+
+amostra$b08famil2 <- factor(amostra$b08famil2,
+                            levels = c(1,2),
+                            labels = c("No", "Yes"))
+
+amostra$b01famil1 <- factor(amostra$b01famil1,
+                            levels = c(1,2),
+                            labels = c("No", "Yes"))
+
 amostra$dep_severa <- factor(amostra$dep_severa,
 levels = c(0,1,2,3),
 labels = c("Euthymic depression", "Mild depression", "Moderate depression", "Severe depression"))
@@ -168,6 +179,8 @@ label(amostra$fobiaespatual) <- "Specific phobia"
 label(amostra$tagatual) <- "Generalized anxiety disorder"
 label(amostra$teptatual) <- "Posttraumatic stress disorder"
 label(amostra$tocatual) <- "Obsessive-compulsive disorder"
+label(amostra$b01famil1) <- "Maternal psychiatric illness"
+label(amostra$b08famil2) <- "Paternal psychiatric illness"
 
 pvalue <- function(x, ...) {
     # Construct vectors of data y, and groups (strata) g
@@ -191,29 +204,35 @@ table1(~ a03sexo + a05idade + cordapele + escolaridade + abepdicotomica +
          vive_companheiro + nemtrabnemestuda + suiciderisk_MINI + alcoolabudep +
          maconhaabudep + alucinogenosabudep + abudepoutrasdrogas +
          abudepoutrasdrogasshipnoticos + cigarroabudep + tpanicoatual + fobiasocialatual + 
-         fobiaespatual + tagatual + teptatual + tocatual | dep_severa,
+         fobiaespatual + tagatual + teptatual + tocatual + b01famil1 + b08famil2 | dep_severa,
          data=amostra,
          extra.col=list(`p-value`=pvalue))
 
 library(furniture)
 
 table1(amostra,
-       "Sex" = a03sexo, "Age" = a05idade, "Skin color" = cordapele,
-       "Years of education" = escolaridade, "Socioeconomic status" = abepdicotomica,
-       "Lives with partner" = vive_companheiro, "Current occupation" = nemtrabnemestuda,
-       "Suicide risk" = suiciderisk_MINI, "Alcohol abuse/dependence" = alcoolabudep,
+       "Sex" = a03sexo,
+       "Age" = a05idade,
+       "Skin color" = cordapele,
+       "Years of education" = escolaridade,
+       "Socioeconomic status" = abepdicotomica,
+       "Lives with partner" = vive_companheiro,
+       "Current occupation" = nemtrabnemestuda,
+       "Suicide risk" = suiciderisk_MINI,
+       "Alcohol abuse/dependence" = alcoolabudep,
        "Marijuana abuse/dependence" = maconhaabudep,
        #"Hallucinogenics abuse/dependence" = alucinogenosabudep,
        "Other drugs abuse/dependence" = abudepoutrasdrogas,
        "Hypnotics abuse/dependence" = abudepoutrasdrogasshipnoticos,
        "Tobacco abuse/dependence" = cigarroabudep,
        "Panic disorder" = tpanicoatual,
-       "Social phobia" = fobiasocialatual, "Specific phobia" = fobiaespatual,
+       "Social phobia" = fobiasocialatual,
+       "Specific phobia" = fobiaespatual,
        "Generalized anxiety disorder" = tagatual,
        "Posttraumatic stress disorder" = teptatual,
        "Obsessive-compulsive disorder" = tocatual,
+       "Maternal psychiatric illness" = b01famil1,
+       "Paternal psychiatric illness" = b08famil2,
        splitby = ~dep_severa,
-       test = TRUE,
-       param = TRUE,
-       export = "secondtry")
+       test = TRUE)
 
