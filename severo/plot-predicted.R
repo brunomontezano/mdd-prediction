@@ -36,3 +36,5 @@ ds_severo %>%
     ylab("All Severe Depressive Cases (%)") +
     xlab("Quintile of Predicted Risk") +
     theme(legend.position = "none")
+
+ggsave("predictions.png")

@@ -36,3 +36,5 @@ ds_recorrentes %>%
     ylab("All Recurrent Depressive Episodes (%)") +
     xlab("Quintile of Predicted Risk") +
     theme(legend.position = "none")
+
+ggsave("predictions.png")
