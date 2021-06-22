@@ -358,3 +358,6 @@ varImp(model)$importance %>% as.data.frame() %>% arrange(desc(Overall)) %>% head
 importance = varImp(model)
 importance = importance$importance
 write.csv(importance, file="importance.csv")
+
+### Check coefficients with direction
+as.data.frame(as.matrix(coef(model$finalModel, model$bestTune$lambda)))
