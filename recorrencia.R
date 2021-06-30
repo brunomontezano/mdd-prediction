@@ -194,8 +194,10 @@ prop.table(table(test_matrix$dep_dic))
 #y = train_matrix[,-33]
 
 ##### Training control #####
-train_control <- trainControl(method="repeatedcv", number=10, repeats=10, savePredictions=TRUE,
-                              classProbs=TRUE, summaryFunction=twoClassSummary)
+train_control <- trainControl(method="LOOCV",
+                              savePredictions=TRUE,
+                              classProbs=TRUE,
+                              summaryFunction=twoClassSummary)
 
 ### Calculating weights ###
 f_no = table(train_matrix$dep_dic)[1]
@@ -209,7 +211,9 @@ model <- train(dep_dic ~ .,
                data=train_matrix,
                trControl=train_control,
                weights=weights,
-               method="glmnet")
+               method="glmnet",
+               tuneGrid = expand.grid(alpha = 0.5,
+                                      lambda = 0.1))
 
 ### Predictions ###
 predictions <- predict(model, test_matrix)

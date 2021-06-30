@@ -233,8 +233,10 @@ prop.table(table(test_matrix$dep_severa))
 #y = train_matrix[,-33]
 
 ##### Training #####
-train_control <- trainControl(method="repeatedcv", number=10, repeats=10, savePredictions=TRUE,
-                              classProbs=TRUE, summaryFunction=twoClassSummary)
+train_control <- trainControl(method="LOOCV",
+                              savePredictions=TRUE,
+                              classProbs=TRUE,
+                              summaryFunction=twoClassSummary)
 
 f_no = table(train_matrix$dep_severa)[1]
 f_yes = table(train_matrix$dep_severa)[2]
@@ -242,8 +244,13 @@ w_no = (f_yes)/(f_no+f_yes)
 w_yes = (f_no)/(f_no+f_yes)
 weights <- ifelse(train_matrix$dep_severa == "No", w_no, w_yes)
 
-model <- train(dep_severa ~ ., data=train_matrix,
-                     trControl=train_control, weights=weights, method="glmnet")
+model <- train(dep_severa ~ .,
+               data=train_matrix,
+               trControl=train_control,
+               weights=weights,
+               method="glmnet",
+               tuneGrid = expand.grid(alpha = 0.5,
+                                      lambda = 0.1))
 
 moderados <- df %>% filter(., dep_severa == 1 | dep_severa == 2) %>% select(names(matrix))
 
