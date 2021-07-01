@@ -361,7 +361,7 @@ write.csv(sensitivities, file="sensitivities.csv")
 write.csv(specificities, file="specificities.csv")
 write.csv(prepare_risk, file="predictions.csv")
 
-varImp(model)$importance %>% as.data.frame() %>% arrange(desc(Overall)) %>% head(5)
+varImp(model)$importance %>% as.data.frame() %>% arrange(desc(Overall))
 importance = varImp(model)
 importance = importance$importance
 write.csv(importance, file="importance.csv")
