@@ -9,7 +9,7 @@ severe depression in MDD patients after three years of follow-up.
 
 The paper is published at *Psychiatry Research Communications*.
 
-# What does the repo contain?
+## What does the repo contain?
 
 It contains:
 
@@ -23,14 +23,14 @@ It contains:
 The scripts use brazilian portuguese on many sections and variable names. Some
 files have comments in english to ease the reading for english speakers.
 
-# Python libraries used:
+## Python libraries used:
 
 The following Python libraries were used:
 `matplotlib`,
 `seaborn`,
 `pandas`.
 
-# R packages used:
+## R packages used:
 
 The following R packages were used:
 `dplyr`,
@@ -41,7 +41,7 @@ The following R packages were used:
 `table1`,
 and `ggplot2`.
 
-# Contact
+## Contact
 
 You can contact me at
 bmontezano@hcpa.edu.br
