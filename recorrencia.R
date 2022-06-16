@@ -1,13 +1,12 @@
 ### Load packages ###
 library(caret)
-library(dplyr)
-library(purrr)
+library(tidyverse)
 
 ### Read datasets ###
 setwd("/home/pepper/dox/repos/amanda-masters/recorrencia/")
-df <- read.csv('../data/banco-conversao-16-10-20.csv')
-df_josi <- read.csv('../data/banco-conversao-josi.csv')
-df_lu <- read.csv('../data/banco-apesm-3-anos.csv')
+df <- read.csv("../data/banco-conversao-16-10-20.csv")
+df_josi <- read.csv("../data/banco-conversao-josi.csv")
+df_lu <- read.csv("../data/banco-apesm-3-anos.csv")
 
 ### Select 2nd wave observations ###
 df <- df %>% filter(., !is.na(mora_t2))
@@ -70,8 +69,8 @@ matrix <- df %>%
                     vive_companheiro, b01famil1, b04interna1, b03med1, b06tentsu1, b08famil2,
                     b10med2, b13tentsu2, nemtrabnemestuda, tpanicoatual, fobiasocialatual,
                     fobiaespatual, a16tratpsic, a30interp, moracomalgunsdospais,
-                    tagatual, teptatual, tocatual, agorafobiaatual, clusterA, clusterB, clusterC, alcoolabudep, maconhaabudep,
-                    abudepoutrasdrogas, abudepoutrasdrogasshipnoticos,
+                    tagatual, teptatual, tocatual, agorafobiaatual, clusterA, clusterB, clusterC,
+                    alcoolabudep, maconhaabudep, abudepoutrasdrogas, abudepoutrasdrogasshipnoticos,
                     cigarroabudep, suiciderisk_MINI, CTQ)
 
 ### Correct wrong codification ###
@@ -248,3 +247,27 @@ write.csv(importance, file="importance.csv")
 
 ### Check coefficients with direction
 as.data.frame(as.matrix(coef(model$finalModel, model$bestTune$lambda)))
+
+coeficientes <- coef(model$finalModel, model$finalModel$lambdaOpt) %>%
+  as.matrix() %>% 
+  as.data.frame() %>% 
+  filter(abs(s1) > 0) %>% 
+  rename(coef_bruto = s1) %>% 
+  mutate(coef_exp = exp(coef_bruto)) %>% 
+  mutate(chances = abs(1 - coef_exp) * 100) %>% 
+  slice(-1) %>% 
+  arrange(desc(chances)) %>% 
+  mutate(direcao = ifelse(coef_bruto < 0, "Menos chances", "Mais chances")) %>% 
+  rownames_to_column(var = "variavel")
+
+tabela_or_recor <- coeficientes %>% 
+  select(variavel, coef_bruto, coef_exp) %>% 
+  rename(beta = coef_bruto, or = coef_exp)
+
+### REVISAO
+modelo_rev <- glm(dep_dic ~ ., data = train_matrix, family = binomial)
+
+predicoes_rev <- predict(modelo_rev, test_matrix, type = "response")
+
+roc_curve = pROC::roc(test_matrix$dep_dic, predicoes_rev, levels=c("Yes", "No"))
+roc_curve

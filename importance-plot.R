@@ -36,9 +36,9 @@ mod3_imp <- mod3_imp %>% mutate(be_filled = ifelse(variable %in% c("moracomalgun
 #                                                                   "cigarroabudep2"), TRUE, FALSE))
 
 # Create labels for each plot
-labels_mod1 <- c("Marijuana use (Yes)", "Suicide risk (Yes)", "Cluster A", "Cluster C", "Specific phobia (Yes)")
+labels_mod1 <- c("Cannabis use (Yes)", "Suicide risk (Yes)", "Cluster A", "Cluster B", "Specific phobia (Yes)")
 labels_mod2 <- c("Cluster C", "Childhood Trauma score", "Cluster A", "Does not work/study",
-                 "Other drugs use (Yes)", "General anxiety disorder (Yes)", "Marijuana use (Yes)",
+                 "Other drugs use (Yes)", "General anxiety disorder (Yes)", "Cannabis use (Yes)",
                  "Gender (Female)", "Specific phobia (Yes)", "Suicide risk (Yes)")
 labels_mod3 <- c("Specific phobia (Yes)", "Age", "Childhood Trauma score", "Tobacco use (Yes)", "Suicide risk (Yes)",
                  "Resides with parents (Yes)", "Cluster A", "Obsessive-compulsive disorder (Yes)",
@@ -51,7 +51,7 @@ mod1_plot <- ggplot(mod1_imp[(mod1_imp$value>0),], aes(x = reorder(variable, val
   ylab(" ") +
   xlab("Predictor") +
   scale_x_discrete(labels = labels_mod1) +
-  theme(axis.text = element_text(size = 15), axis.title = element_text(size = 15)) +
+  theme(axis.text = element_text(size = 9), axis.title = element_text(size = 11)) +
   theme(legend.position = "none")
 
 
@@ -61,7 +61,7 @@ mod2_plot <- ggplot(mod2_imp[(mod2_imp$value>0),], aes(x = reorder(variable, val
   ylab("Importance level") +
   xlab(element_blank()) +
   scale_x_discrete(labels = labels_mod2) +
-  theme(axis.text = element_text(size = 15), axis.title = element_text(size = 15)) +
+  theme(axis.text = element_text(size = 9), axis.title = element_text(size = 11)) +
   theme(legend.position = "none")
 
 mod3_plot <- ggplot(mod3_imp[(mod3_imp$value>0),], aes(x = reorder(variable, value), y = value, fill = be_filled)) +
@@ -70,7 +70,7 @@ mod3_plot <- ggplot(mod3_imp[(mod3_imp$value>0),], aes(x = reorder(variable, val
   ylab(" ") +
   xlab(element_blank()) +
   scale_x_discrete(labels = labels_mod3) +
-  theme(axis.text = element_text(size = 15), axis.title = element_text(size = 15)) +
+  theme(axis.text = element_text(size = 9), axis.title = element_text(size = 11)) +
   theme(legend.position = "none")
 
 # Use ggarrange to make a grid with all plots
@@ -83,7 +83,15 @@ theme_set(
 preditores <- ggarrange(mod1_plot, mod2_plot, mod3_plot,
                     labels = c("Model 1", "Model 2", "Model 3"),
                     ncol = 3, nrow = 1,
-                    font.label = list (size = 14, face = "bold", color = "black"))
+                    font.label = list (size = 13,
+                      face = "bold",
+                      color = "black"))
 
 # Check the result
 preditores
+
+ggsave(
+       plot = preditores,
+       filename = "~/tmp/figura_arrumada.png",
+       dpi = 300
+)

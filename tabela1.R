@@ -198,15 +198,19 @@ pvalue <- function(x, ...) {
     c("", sub("<", "&lt;", format.pval(p, digits=3, eps=0.001)))
 }
 
-options(browser = "brave")
+options(browser = "firefox")
 
-table1(~ a03sexo + a05idade + cordapele + escolaridade + abepdicotomica +
+tabela_1_word <- table1(~ a03sexo + a05idade + cordapele + escolaridade + abepdicotomica +
          vive_companheiro + nemtrabnemestuda + suiciderisk_MINI + alcoolabudep +
          maconhaabudep + alucinogenosabudep + abudepoutrasdrogas +
          abudepoutrasdrogasshipnoticos + cigarroabudep + tpanicoatual + fobiasocialatual + 
          fobiaespatual + tagatual + teptatual + tocatual + b01famil1 + b08famil2 | dep_severa,
          data=amostra,
          extra.col=list(`p-value`=pvalue))
+
+tabela_1_word |> 
+  table1::t1flex() |> 
+  flextable::save_as_docx(path = "~/tmp/Table_1_BM.docx")
 
 library(furniture)
 

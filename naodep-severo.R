@@ -368,3 +368,27 @@ write.csv(importance, file="importance.csv")
 
 ### Check coefficients with direction
 as.data.frame(as.matrix(coef(model$finalModel, model$bestTune$lambda)))
+
+coeficientes <- coef(model$finalModel, model$finalModel$lambdaOpt) %>%
+  as.matrix() %>% 
+  as.data.frame() %>% 
+  filter(abs(s1) > 0) %>% 
+  rename(coef_bruto = s1) %>% 
+  mutate(coef_exp = exp(coef_bruto)) %>% 
+  mutate(chances = abs(1 - coef_exp) * 100) %>% 
+  slice(-1) %>% 
+  arrange(desc(chances)) %>% 
+  mutate(direcao = ifelse(coef_bruto < 0, "Menos chances", "Mais chances")) %>% 
+  rownames_to_column(var = "variavel")
+
+tabela_or_naodep_sev <- coeficientes %>% 
+  select(variavel, coef_bruto, coef_exp) %>% 
+  rename(beta = coef_bruto, or = coef_exp)
+
+### REVISAO
+modelo_rev <- glm(dep_severa ~ ., data = train_matrix, family = binomial)
+
+predicoes_rev <- predict(modelo_rev, test_matrix, type = "response")
+
+roc_curve = pROC::roc(test_matrix$dep_severa, predicoes_rev, levels=c("Yes", "No"))
+roc_curve
