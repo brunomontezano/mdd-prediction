@@ -6,3 +6,12 @@ notes/
 images/
 data/
 tables/
+severo/*csv
+severo/*png
+severo/*txt
+recorrencia/*csv
+recorrencia/*png
+recorrencia/*txt
+naodep-severo/*csv
+naodep-severo/*png
+naodep-severo/*txt
