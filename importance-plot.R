@@ -92,6 +92,6 @@ preditores
 
 ggsave(
        plot = preditores,
-       filename = "~/tmp/figura_arrumada.png",
+       filename = "~/tmp/final_imp_plot.png",
        dpi = 300
 )
