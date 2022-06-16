@@ -7,7 +7,8 @@ techniques".
 The study aimed to predict major depressive disorder (MDD) recurrence and
 severe depression in MDD patients after three years of follow-up.
 
-The paper is published at *Psychiatry Research Communications*.
+The paper is published at [*Psychiatry Research
+Communications*](https://www.journals.elsevier.com/psychiatry-research-communications).
 
 ## What does the repo contain?
 
