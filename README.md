@@ -1,5 +1,7 @@
 # Analysis scripts from "Predicting 3-year persistent or recurrent major depressive episode using machine learning techniques"
 
+[![DOI](https://img.shields.io/badge/DOI-10.1016%2Fj.psycom.2022.100055-blue)](https://doi.org/10.1016/j.psycom.2022.100055)
+
 This repository maintains the data analysis from the paper entitled "Predicting
 3-year persistent or recurrent major depressive episode using machine learning
 techniques".
@@ -9,6 +11,9 @@ severe depression in MDD patients after three years of follow-up.
 
 The paper is published at [*Psychiatry Research
 Communications*](https://www.journals.elsevier.com/psychiatry-research-communications).
+
+You can click the badge at the top of README to read the article, or click
+[here](https://doi.org/10.1016/j.psycom.2022.100055).
 
 ## What does the repo contain?
 
