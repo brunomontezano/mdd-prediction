@@ -1,4 +1,4 @@
-# Analysis scripts from "Predicting 3-year persistent or recurrent major depressive episode using machine learning techniques"
+# Analysis scripts from "Predicting 3-year persistent or recurrent major depressive episode using machine learning techniques" <a href='https://github.com/brunomontezano/mdd-prediction/'><img src='figures/depression.jpg' align="right" height="139" /></a>
 
 [![DOI](https://img.shields.io/badge/DOI-10.1016%2Fj.psycom.2022.100055-blue)](https://doi.org/10.1016/j.psycom.2022.100055)
 
